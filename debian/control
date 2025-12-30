@@ -1,0 +1,23 @@
+Source: cz-pdns-primary
+Section: admin
+Priority: optional
+Maintainer: Bill MacAllister <bill@ca-zephyr.org>
+Build-Depends: debhelper (>= 12),
+ kstart,
+ libappconfig-perl,
+ libgetopt-long-descriptive-perl,
+ libipc-run-perl,
+ perl,
+ perl-doc,
+ perltidy
+Standards-Version: 4.0.6.1
+
+Package: cz-pdns-primary
+Architecture: all
+Depends: ${misc:Depends}, ${perl:Depends},
+ kstart,
+ libappconfig-perl,
+ libgetopt-long-descriptive-perl,
+ perl-doc
+Description: Utilities for Power DNS primary servers
+ Some simple scripts for PDNS primary instances.

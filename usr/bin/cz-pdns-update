@@ -1,0 +1,97 @@
+#!/bin/bash
+#
+# cz-pdns-update --- restart power dns primary and replicas
+#
+# Copyright 2025, CZ Software
+
+##############################################################################
+# Subroutines
+##############################################################################
+
+function help_em {
+    echo "Usage: cz-pdns-update help|now"
+    exit 1
+}
+
+##############################################################################
+# Main routine
+##############################################################################
+
+if [ "$1" = "" ];     then help_em; fi
+if [ "$1" = "help" ]; then help_em; fi
+
+confFile="/etc/cz-pdns-primary.conf"
+if [ -e $confFile ]
+then
+    source $confFile
+fi
+if [ "$REPLICAS" = "" ]
+then
+   REPLICAS="cz-dns-r1 cz-dns-r2 cz-dns-r3"
+fi
+if [ "$PRIMARY" = "" ]
+then
+   PRIMARY="cz-dns"
+fi
+
+for H in $PRIMARY $REPLICAS
+do
+    echo "Restarting pdns daemon on $H ..."
+    k5start -f /etc/krb5.keytab -U -- remctl $H pdns restart
+done
+
+exit
+
+DOCS=<<__END_OF_DOCS__
+
+=head1 NAME
+
+cz-pdns-update - Restart Power DNS primary and replica servers
+
+=head1 SYNOPSIS
+
+cz-pdns-update now
+
+=head1 DESCRIPTION
+
+This script returns the primary and replica Power DNS servers.  This
+essentially performs a DNS refresh without waiting for TTL timeouts.
+If the command line parameter is anything other than empty or "help"
+then a update if performed.
+
+The script reads the list of replicas from the configuration file
+/etc/cz-pdns-primary.conf if it exists.  The configuration file is a
+bash fragment that defines the variables PRIMARY and REPLICAS.
+PRIMARY is single valued and REPLICAS is a space separated list of
+host replicas.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2025 Bill MacAllister <bill@ca-zephyr.org>
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+=head1 AUTHORS
+
+Bill MacAllister <bill@ca-zephyr.org>
+
+=cut
+
+__END_OF_DOCS__

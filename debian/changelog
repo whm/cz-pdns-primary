@@ -1,0 +1,5 @@
+cz-pdns-primary (1) unstable; urgency=low
+
+  * Initial packaging of Power DNS primary utility scripts.
+
+ -- Bill MacAllister <bill@ca-zephyr.org>  Mon, 29 Dec 2025 22:52:15 +0000

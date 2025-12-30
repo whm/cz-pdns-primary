@@ -1,0 +1,8 @@
+# PowerDNS primary scripts
+#
+pdns-update ALL /usr/bin/cz-pdns-update \
+    /etc/remctl/acl/ca-zephyr-admin \
+    /etc/remctl/acl/pdns-hosts
+pdns-backup ALL /usr/bin/cz-pdns-backup \
+    /etc/remctl/acl/ca-zephyr-admin \
+    /etc/remctl/acl/pdns-hosts
