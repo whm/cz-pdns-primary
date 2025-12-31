@@ -1,3 +1,9 @@
+cz-pdns-primary (2) unstable; urgency=medium
+
+  * Syntax error in cz-pdns-backup.
+
+ -- Bill MacAllister <bill@ca-zephyr.org>  Wed, 31 Dec 2025 10:12:09 +0000
+
 cz-pdns-primary (1) unstable; urgency=low
 
   * Initial packaging of Power DNS primary utility scripts.

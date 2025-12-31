@@ -31,20 +31,28 @@ then
    thisDate=`date --iso-8601`
    BACKUP_DIR="/afs/.ca-zephyr.org/backup/dns/$thisHost/$thisDate"
 fi
+if [ "$KEYTAB" = "" ]
+then
+    KEYTAB='/etc/krb5.keytab'
+fi
 
 if [ -e $KEYTAB ]
 then
-    KRB="kstart -f $KEYTAB -U -- "
+    KRB="k5start -f $KEYTAB -U -t -- "
 else
     KRB=""
 fi
 
 if [ ! -e $BACKUP_DIR ]
 then
-    $KRB mkdir -vp $BACKUP_DIR
+    cmd="$KRB mkdir -vp $BACKUP_DIR"
+    echo "Executing: $cmd"
+    $cmd
 fi
 
-$KRB cp -v /var/lib/powerdns/zones.master.d/* $BACKUP_DIR/
+cmd="$KRB cp -v /var/lib/powerdns/zones.master.d/* $BACKUP_DIR/"
+echo "Executing: $cmd"
+$cmd
 
 exit
 
