@@ -1,5 +1,8 @@
 # PowerDNS primary scripts
 #
+zone-update ALL /usr/bin/cz-zone-update \
+    /etc/remctl/acl/ca-zephyr-admin \
+    /etc/remctl/acl/pdns-hosts
 pdns-update ALL /usr/bin/cz-pdns-update \
     /etc/remctl/acl/ca-zephyr-admin \
     /etc/remctl/acl/pdns-hosts

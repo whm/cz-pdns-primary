@@ -7,6 +7,7 @@ use Test::More qw( no_plan );
 my @script_list = (
     'usr/bin/cz-pdns-backup',
     'usr/bin/cz-pdns-update',
+    'usr/bin/cz-zone-update',
     );
 for my $sname (@script_list) {
     my $s = "../$sname";

@@ -1,3 +1,10 @@
+cz-pdns-primary (3) unstable; urgency=medium
+
+  * Add cz-zone-update.  This allows the zone files to be managed
+    using git.
+
+ -- Bill MacAllister <bill@ca-zephyr.org>  Wed, 28 Oct 2026 08:20:42 +0000
+
 cz-pdns-primary (2) unstable; urgency=medium
 
   * Syntax error in cz-pdns-backup.

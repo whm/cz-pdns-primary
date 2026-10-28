@@ -1,0 +1,192 @@
+#!/bin/bash
+#
+# cz-zone-update -- Refresh the DNS databases from git
+#
+# Written by Bill MacAllister <bill@ca-zephyr.org>
+# Copyright (c) 2026 Bill MacAllister <bill@ca-zephyr.org>
+
+##############################################################################
+# Subroutines
+##############################################################################
+
+# Display a usage message
+function help_em {
+    echo "Usage: cz-zone-update [update|refresh|help|manual]"
+    exit 1
+}
+
+# Update the DNS database directroy
+
+function update_db {
+    TMP_DIR="/tmp/pdns-db/"
+    GIT_DIR="/afs/cz/service/software/a_git/powerdns.git"
+    OUT_DIR="/var/lib/powerdns/"
+    KRB_CMD="yes"
+
+    conf_file="/etc/cz-zone-update.conf"
+    if [ -e $conf_file ]
+    then
+        source $conf_file
+    fi
+    
+    if [ -e $TMP_DIR ]
+    then
+        rm -rf $TMPDIR
+    fi
+    for d in $TMP_DIR $OUT_DIR
+    do
+        if [ ! -e $d ]
+        then
+            mkdir -p $d
+        fi
+    done
+
+    echo "git archive to $TMP_DIR"
+    if [ $KRB_CMD = "yes" ]
+    then
+        k5start -f /etc/krb5.keytab -Ut -- \
+	    git --git-dir=$GIT_DIR archive master \
+            | tar --directory $TMP_DIR -x
+    else 	    
+        git --git-dir=$GIT_DIR archive master \
+            | tar --directory $TMP_DIR -x
+    fi
+    if [ $? -ne 0 ]
+    then
+        echo "git archive command failed"
+        exit 1
+    fi
+    echo "rsync to $OUT_DIR"
+    if [ $KRB_CMD = "yes" ]
+    then
+        k5start -f /etc/krb5.keytab -Ut -- \
+		rsync --recursive --delete $TMP_DIR $OUT_DIR
+    else
+	rsync --recursive --delete $TMP_DIR $OUT_DIR
+    fi
+}
+ 
+case $1 in
+    help)
+        help_em
+        exit 1
+        ;;
+    manual)
+        man cz-zone-update
+        exit 1
+        ;;
+    update)
+        update_db
+        ;;
+    refresh)
+        update_db
+        systemctl restart pdns
+        ;;
+    *)
+        help_em
+        ;;
+esac
+
+exit
+
+DOCS=<<__END_OF_DOCS__
+
+=head1 NAME
+
+cz-zone-update - refresh the dns database from the git archive
+
+=head1 SYNOPSIS
+
+cz-update [update|refresh|help|manual]
+
+=head1 DESCRIPTION
+
+A script will checkout the current DNS definitions held in the
+a git archive and push the changes to the DNS database directory.
+The script will optionally restart the DNS server. The script
+is intended to be the target of remctl and has been tested
+against PowerDNS.
+
+=head1 OPTIONS
+
+=over 4
+
+=item update
+
+Update the DNS database
+
+=item refresh
+
+Update the DNS database and restart the DNS server.
+
+=item help
+
+Display usage information.
+
+=item manual
+
+Display the man page for this script.
+
+=back
+
+=head1 Configuration File
+
+The configuration file is a bash fragment that if present will be
+source'd before any commands are executed.  The valid bash variables
+are defined below.  The configuration file name is
+/etc/cz-zone-update.conf.
+
+=over 4
+
+=item TMP_DIR
+
+This is that path to the working directory that will hold the output
+of the git archive command.  Default is "/tmp/pdns-db/".
+
+=item GIT_DIR
+
+This is the directory that holds the bare git repostitory.  Default is
+"/afs/cz/service/software/a_git/powerdns.git".
+
+=item OUT_DIR
+
+Is the location of the PowerDNS zone files.  Default is
+"/var/lib/powerdns/".
+
+=item KRB_CMD
+
+If set to 'yes' then k5start is used to obtain AFS tokens before
+executing git and rsync commands.  The default value is 'yes'.
+
+=back
+
+=head1 COPYRIGHT
+
+Copyright (c) 2026 Bill MacAllister <bill@ca-zephyr.org>
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+=head1 AUTHORS
+
+Bill MacAllister <whm@dropbox.com>
+
+=cut
+
+__END_OF_DOCS__
